@@ -66,4 +66,28 @@ describe('Todo API', () => {
     expect(res.status).toBe(201);
     expect(res.body).toMatchObject(todo);
   });
+
+  it('DELETE /todos/:id should delete a todo by id', async () => {
+    // Add a todo first
+    const todo = {
+      summary: 'Delete me',
+      author: 'Author',
+      completed: false
+    };
+    const postRes = await request(app).post('/todos').send(todo);
+    const todoId = postRes.body.id;
+    // Delete the todo
+    const delRes = await request(app).delete(`/todos/${todoId}`);
+    expect(delRes.status).toBe(200);
+    expect(delRes.body).toMatchObject(todo);
+    // Should be empty now
+    const getRes = await request(app).get('/todos');
+    expect(getRes.body).toEqual([]);
+  });
+
+  it('DELETE /todos/:id should return 404 for invalid id', async () => {
+    const res = await request(app).delete('/todos/invalid-id');
+    expect(res.status).toBe(404);
+    expect(res.body.error).toBeDefined();
+  });
 });
